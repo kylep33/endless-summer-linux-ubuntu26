@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Endless Summer
+Description=Sunset boot splash for Endless Summer Linux
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/endless-summer
+ScriptFile=/usr/share/plymouth/themes/endless-summer/endless-summer.script

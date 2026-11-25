@@ -1,0 +1,11 @@
+{
+    "KPackageStructure": "Plasma/LookAndFeel",
+    "KPlugin": {
+        "Authors": [ { "Name": "kylep33" } ],
+        "Category": "",
+        "Description": "Sun, sand and longboards. A 60s surf-film look for Plasma",
+        "Id": "org.endlesssummer.desktop",
+        "License": "GPLv2+",
+        "Name": "Endless Summer"
+    }
+}

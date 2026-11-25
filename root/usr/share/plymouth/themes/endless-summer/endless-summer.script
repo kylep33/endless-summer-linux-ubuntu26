@@ -1,0 +1,70 @@
+# Endless Summer boot splash: sunset art filling the screen, logo, progress bar,
+# and a password prompt for encrypted disks.
+Window.SetBackgroundTopColor(0.04, 0.11, 0.18);
+Window.SetBackgroundBottomColor(0.04, 0.11, 0.18);
+sw = Window.GetWidth();
+sh = Window.GetHeight();
+
+bg_img = Image("background.png");
+s = Math.Max(sw / bg_img.GetWidth(), sh / bg_img.GetHeight());
+bg_img = bg_img.Scale(Math.Int(bg_img.GetWidth() * s), Math.Int(bg_img.GetHeight() * s));
+bg = Sprite(bg_img);
+bg.SetPosition(Math.Int((sw - bg_img.GetWidth()) / 2), Math.Int((sh - bg_img.GetHeight()) / 2), -10);
+
+logo_img = Image("logo.png");
+lw = Math.Int(Math.Min(logo_img.GetWidth(), sw * 0.4));
+lh = Math.Int(logo_img.GetHeight() * lw / logo_img.GetWidth());
+logo = Sprite(logo_img.Scale(lw, lh));
+logo.SetPosition(Math.Int((sw - lw) / 2), Math.Int(sh * 0.30 - lh / 2), 10);
+
+bar_w = Math.Int(Math.Min(420, sw * 0.5));
+bar_x = Math.Int((sw - bar_w) / 2);
+bar_y = Math.Int(sh * 0.88);
+bar_img = Image("bar.png");
+track = Sprite(bar_img.Scale(bar_w, 6));
+track.SetPosition(bar_x, bar_y, 10);
+track.SetOpacity(0.3);
+fill = Sprite();
+fill.SetPosition(bar_x, bar_y, 11);
+
+fun progress_cb(duration, progress) {
+    w = Math.Int(bar_w * progress);
+    if (w > 0) fill.SetImage(bar_img.Scale(w, 6));
+}
+Plymouth.SetBootProgressFunction(progress_cb);
+
+prompt = Sprite();
+bullets = Sprite();
+prompt.SetPosition(0, 0, 20);
+bullets.SetPosition(0, 0, 20);
+
+fun password_cb(text, count) {
+    if (text == "") text = "Password";
+    t = Image.Text(text, 0.98, 0.96, 0.89);
+    prompt.SetImage(t);
+    prompt.SetPosition(Math.Int((sw - t.GetWidth()) / 2), Math.Int(sh * 0.70), 20);
+    dots = "";
+    for (i = 0; i < count; i++) dots += "●";
+    if (dots == "") dots = " ";
+    b = Image.Text(dots, 0.95, 0.55, 0.16);
+    bullets.SetImage(b);
+    bullets.SetPosition(Math.Int((sw - b.GetWidth()) / 2), Math.Int(sh * 0.70 + t.GetHeight() * 2), 20);
+    prompt.SetOpacity(1);
+    bullets.SetOpacity(1);
+}
+Plymouth.SetDisplayPasswordFunction(password_cb);
+
+fun normal_cb() {
+    prompt.SetOpacity(0);
+    bullets.SetOpacity(0);
+}
+Plymouth.SetDisplayNormalFunction(normal_cb);
+
+message = Sprite();
+message.SetPosition(0, 0, 20);
+fun message_cb(text) {
+    m = Image.Text(text, 0.98, 0.96, 0.89);
+    message.SetImage(m);
+    message.SetPosition(Math.Int((sw - m.GetWidth()) / 2), Math.Int(sh * 0.93), 20);
+}
+Plymouth.SetMessageFunction(message_cb);

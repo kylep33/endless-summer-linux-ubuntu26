@@ -1,0 +1,8 @@
+[Sound Theme]
+Name=Endless Summer
+Comment=Chicken Joe and The Sandals for Endless Summer Linux
+Inherits=ocean
+Directories=stereo
+
+[stereo]
+OutputProfile=stereo

@@ -1,0 +1,11 @@
+{
+    "KPackageStructure": "Plasma/LookAndFeel",
+    "KPlugin": {
+        "Authors": [ { "Name": "kylep33" } ],
+        "Category": "",
+        "Description": "The sun goes down, the surf stays up. Dark Endless Summer look for Plasma",
+        "Id": "org.endlesssummernight.desktop",
+        "License": "GPLv2+",
+        "Name": "Endless Summer Night"
+    }
+}
