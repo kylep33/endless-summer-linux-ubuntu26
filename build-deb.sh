@@ -5,7 +5,7 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-VERSION=${VERSION:-26.1.1}
+VERSION=${VERSION:-26.1.2}
 OUT=endless-summer-theme_${VERSION}_all.deb
 PKG=$(mktemp -d)
 trap 'rm -rf "$PKG"' EXIT

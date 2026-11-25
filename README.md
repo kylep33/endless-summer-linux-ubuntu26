@@ -7,8 +7,8 @@ Turns an Ubuntu (or any Debian-family) install into a 60s surf-film desktop: KDE
 ## Build
 
 ```
-./build-deb.sh          # → endless-summer-theme_26.1.1_all.deb
-./build-sounds-deb.sh   # → endless-summer-sounds_26.1.1_all.deb (optional)
+./build-deb.sh          # → endless-summer-theme_26.1.2_all.deb
+./build-sounds-deb.sh   # → endless-summer-sounds_26.1.2_all.deb (optional)
 ```
 
 Needs only `dpkg-deb`.
@@ -17,7 +17,7 @@ Needs only `dpkg-deb`.
 
 ```
 cp endless-summer-*.deb /tmp/
-sudo apt install /tmp/endless-summer-theme_26.1.1_all.deb /tmp/endless-summer-sounds_26.1.1_all.deb
+sudo apt install /tmp/endless-summer-theme_26.1.2_all.deb /tmp/endless-summer-sounds_26.1.2_all.deb
 ```
 
 1. Apt pulls in KDE Plasma, SDDM, Plymouth, Papirus and the X server. When asked for a display manager, pick **sddm**.

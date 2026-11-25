@@ -19,10 +19,8 @@ SAND, CREAM, CORAL, ORANGE, SUN = "#EDD7A8", "#FBF4E4", "#E0472F", "#F28C28", "#
 
 # Surf photos for the wallpaper pool, in photos/surf/: (file, crop ytop, pre-crop box or None)
 PHOTOS = [
-    ("surf.jpg", 0.5, None), ("surf2.jpg", 0.5, None), ("surf3.jpg", 0.5, None), ("surf4.jpg", 0.5, None),
-    ("surf5.jpg", 0.5, None),
-    ("surf6.jpg", 0.3, (0, 0, 982, 861)),  # dark line down the right edge
-    ("surf7.jpeg", 0.5, None), ("surf8.jpg", 0.5, None),
+    ("surfback1.jpg", 0.5, None), ("surfaback2.png", 0.5, None), ("surfback3.jpg", 0.5, None),  # surfback3 is AVIF despite the name
+    ("surfback4.jpg", 0.5, None), ("surfback5.jpeg", 0.5, None), ("surfback6.jpg", 0.5, None),
 ]
 
 
@@ -132,7 +130,7 @@ if __name__ == "__main__":
         save(pool[name], f"usr/share/endless-summer/wallpapers/{i:02}.jpg", quality=92)
 
     # the default wallpaper package (before the first login picks one): day in images/, night in images_dark/
-    day, night = pool["surf2.jpg"], pool["surf5.jpg"]
+    day, night = pool["surfback1.jpg"], pool["surfback5.jpeg"]
     for img, sub in [(day, "images"), (night, "images_dark")]:
         save(fit(img, 1920, 1080), "usr/share/wallpapers/EndlessSummer/contents", sub, "1920x1080.jpg", quality=90)
     save(fit(day, 400, 225), "usr/share/wallpapers/EndlessSummer/contents/screenshot.png")
@@ -153,7 +151,7 @@ if __name__ == "__main__":
     save(logo256, "usr/share/endless-summer/logo.png")
 
     # plymouth: a dark photo, dimmed further under the logo, plus logo+title on its own so the script can center it
-    boot = fit(pool["surf5.jpg"], 1920, 1080)
+    boot = fit(pool["surfback5.jpeg"], 1920, 1080)
     save(Image.blend(boot, Image.new("RGB", boot.size, NAVY), 0.35), "usr/share/plymouth/themes/endless-summer/background.png")
     plogo = Image.new("RGBA", (720, 420))
     plogo.alpha_composite(svg2img(svg, 240, 240), (240, 0))
