@@ -1,26 +1,26 @@
 # Endless Summer Linux for Ubuntu 26.04
 
-Turns an Ubuntu (or any Debian-family) install into a 60s surf-film desktop: KDE Plasma 6 global theme in **Endless Summer** (day) and **Endless Summer Night** variants, sand/ocean color schemes, Papirus icons with sand or ocean folders, real HD surf photos as wallpaper (a new random one at every login), SDDM login screen, Plasma splash and Plymouth boot splash. Works the same way as Hannah Montana Linux (`../hannah-montana-linux-ubuntu26`).
+Turns an Ubuntu (or any Debian-family) install into a 60s surf-film desktop: KDE Plasma 6 global theme in **Endless Summer** (day) and **Endless Summer Night** variants, sand/ocean color schemes, [Colloid](https://github.com/vinceliuice/Colloid-icon-theme) icons with orange (day) or teal (night) folders, a solid navy floating panel, real HD surf photos as wallpaper (a new random one at every login), SDDM login screen, Plasma splash and Plymouth boot splash. Works the same way as Hannah Montana Linux (`../hannah-montana-linux-ubuntu26`).
 
 **Personal use only.** The photos (including the wallpapers), the Chicken Joe avatar and the sound clips come from films and records we don't own. Don't publish the `.deb`s or this folder.
 
 ## Build
 
 ```
-./build-deb.sh          # → endless-summer-theme_26.1.2_all.deb
-./build-sounds-deb.sh   # → endless-summer-sounds_26.1.2_all.deb (optional)
+./build-deb.sh          # → endless-summer-theme_26.1.5_all.deb
+./build-sounds-deb.sh   # → endless-summer-sounds_26.1.5_all.deb (optional)
 ```
 
-Needs only `dpkg-deb`.
+Needs `dpkg-deb`, plus `curl` the first time: `build-deb.sh` downloads a pinned, checksummed Colloid release into `assets/` and assembles the icon themes from it.
 
 ## Install
 
 ```
 cp endless-summer-*.deb /tmp/
-sudo apt install /tmp/endless-summer-theme_26.1.2_all.deb /tmp/endless-summer-sounds_26.1.2_all.deb
+sudo apt install /tmp/endless-summer-theme_26.1.5_all.deb /tmp/endless-summer-sounds_26.1.5_all.deb
 ```
 
-1. Apt pulls in KDE Plasma, SDDM, Plymouth, Papirus and the X server. When asked for a display manager, pick **sddm**.
+1. Apt pulls in KDE Plasma, SDDM, Plymouth and the X server. When asked for a display manager, pick **sddm**.
 2. Reboot.
 3. On the login screen, pick the **Plasma** session (bottom-left), then log in.
 
@@ -52,4 +52,4 @@ Add or swap clips by dropping `.wav` files into `transitions/<pool>/` and rebuil
 
 ## Credits
 
-Built on KDE Breeze (SDDM theme, color scheme structure, splash) and [Papirus](https://github.com/PapirusDevelopmentTeam/papirus-icon-theme) icons (GPLv3). Font: [Bebas Neue](https://github.com/dharmatype/Bebas-Neue) (OFL). Package structure from Hannah Montana Linux 26. Licensed GPLv3+ (see `LICENSE`), except the third-party media noted above.
+Built on KDE Breeze (SDDM theme, color scheme structure, splash, panel background), [Colloid](https://github.com/vinceliuice/Colloid-icon-theme) icons (GPLv3). Font: [Bebas Neue](https://github.com/dharmatype/Bebas-Neue) (OFL). Package structure from Hannah Montana Linux 26. Licensed GPLv3+ (see `LICENSE`), except the third-party media noted above.

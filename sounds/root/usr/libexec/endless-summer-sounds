@@ -1,18 +1,32 @@
 #!/bin/sh
-# Every login: deal a random clip from each pool to each KDE sound.
+# Every login (from a plasma-workspace env script, before Plasma starts): deal a random clip from each
+# pool to each KDE sound, and patch the app menu and volume popup.
+# usage: endless-summer-sounds [--on|--off|--state]   (the "Theme sounds" switch in the volume popup)
+# Off removes the clip links; the theme inherits ocean, so KDE's stock sounds play instead.
 pools=/usr/share/endless-summer-sounds
 theme="${XDG_DATA_HOME:-$HOME/.local/share}/sounds/endless-summer"
+applets="${XDG_DATA_HOME:-$HOME/.local/share}/plasma/plasmoids"
+off="${XDG_CONFIG_HOME:-$HOME/.config}/endless-summer-sounds-off"
+
+case "$1" in
+    --state) [ -e "$off" ] && echo off || echo on; exit 0 ;;
+    --off) touch "$off" ;;
+    --on) rm -f "$off" ;;
+    "") ;;
+    *) echo "usage: $0 [--on|--off|--state]" >&2; exit 2 ;;
+esac
+
 mkdir -p "$theme/stereo"
 cp -f "$pools/index.theme" "$theme/"
+rm -f "$theme"/stereo/*.wav
 
 pick() { find "$pools/$1" -name '*.wav' | shuf -n1; }
 
-while read -r pool sounds; do
+[ -e "$off" ] || while read -r pool sounds; do
     for s in $sounds; do
         clip=$(pick "$pool")
         [ -n "$clip" ] || continue
-        # rename so the login sound can never catch a half-replaced link
-        ln -sf "$clip" "$theme/stereo/.$s.tmp" && mv -Tf "$theme/stereo/.$s.tmp" "$theme/stereo/$s.wav"
+        ln -sf "$clip" "$theme/stereo/$s.wav"
     done
 done <<EOF
 login_sounds desktop-login session-unlocked alarm-clock-elapsed
@@ -20,6 +34,27 @@ logout_sounds desktop-logout session-locked
 notification_sounds trash-empty device-added power-plug battery-full completion-success message-new-instant
 error_sounds device-removed power-unplug battery-low battery-caution dialog-error dialog-error-serious dialog-error-critical dialog-warning dialog-question dialog-warning-auth
 EOF
+# played by the patched app menu, see patches/kickoff.qml
+[ -e "$off" ] || ln -sf "$pools/notification_sounds/opened-my-pores.wav" "$theme/stereo/es-menu-open.wav"
+
+# libcanberra caches lookups and won't notice the links changing.
+rm -f "${XDG_CACHE_HOME:-$HOME/.cache}"/event-sound-cache.tdb.*
+
+[ -z "$1" ] || exit 0  # the switch only changes the links; the rest is login setup
+
+# patch_applet <applet id> <anchor regex> <snippet> <import line>: a per-login copy of a system Plasma
+# applet with patches/<snippet> inserted after the anchor line. Plasma prefers ~/.local/share over
+# /usr/share, and copying fresh each login follows Plasma upgrades. Anchor gone -> stock applet.
+patch_applet() {
+    sys=/usr/share/plasma/plasmoids/$1 mine=$applets/$1
+    [ -e "$mine/.endless-summer" ] && rm -rf "$mine"  # never touch an override that isn't ours
+    { [ ! -e "$mine" ] && grep -q "$2" "$sys/contents/ui/main.qml" 2>/dev/null; } || return 0
+    mkdir -p "$applets" && cp -r "$sys" "$mine" && touch "$mine/.endless-summer"
+    sed "s|@THEME@|$theme|g" "$pools/patches/$3" > "$mine/.snippet"
+    sed -i -e "/^import QtQuick\$/a $4" -e "/$2/r $mine/.snippet" "$mine/contents/ui/main.qml"
+}
+patch_applet org.kde.plasma.kickoff '^    id: kickoff$' kickoff.qml 'import QtMultimedia as ESSound'
+patch_applet org.kde.plasma.volume '^        footer: PlasmaExtras.PlasmoidHeading {$' volume.qml 'import org.kde.plasma.plasma5support as ESP5'
 
 # Once per user, so a sound theme picked later in System Settings is left alone.
 marker="${XDG_CONFIG_HOME:-$HOME/.config}/endless-summer-sounds-applied"
@@ -34,7 +69,5 @@ if [ ! -e "$marker" ]; then
         kwriteconfig6 --file ksmserver.notifyrc --group "Event/$e" --key Action Sound
         kwriteconfig6 --file ksmserver.notifyrc --group "Event/$e" --key Sound "session-$e"
     done
-    # libcanberra caches lookups and won't notice the theme's links appearing.
-    rm -f "${XDG_CACHE_HOME:-$HOME/.cache}"/event-sound-cache.tdb.*
     touch "$marker"
 fi

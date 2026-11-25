@@ -1,0 +1,9 @@
+{
+    "KPlugin": {
+        "Id": "EndlessSummer",
+        "Name": "Endless Summer",
+        "Description": "Breeze shapes in navy and sand: an opaque navy panel with cream icons",
+        "License": "GPL-3.0-or-later"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

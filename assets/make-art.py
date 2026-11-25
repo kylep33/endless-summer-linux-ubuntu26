@@ -5,7 +5,7 @@ Needs: cairosvg, pillow (pip, in a venv). Run: python make-art.py
 Inputs in this folder: photos/*.png (reference photos), joe-frame.png (avatar source),
 fonts/BebasNeue-Regular.ttf, photos/surf/* (wallpaper pool).
 """
-import io, os
+import base64, io, os
 import cairosvg
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
@@ -51,21 +51,17 @@ def title(img, text, size, xy, fill, shadow, anchor="ls", spacing=0.08):
 
 
 def logo_svg():
-    s = 512
-    cuts = "".join(f'<rect x="0" y="{y}" width="{s}" height="{g}" fill="url(#sky)"/>' for y, g in [(236, 8), (268, 13), (300, 18)])
-    return f'''<svg xmlns="http://www.w3.org/2000/svg" width="{s}" height="{s}" viewBox="0 0 {s} {s}">
-<defs><clipPath id="c"><circle cx="256" cy="256" r="232"/></clipPath>
-<linearGradient id="sky" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="{s}"><stop offset="0" stop-color="{SKY}"/><stop offset="1" stop-color="#FCE6B6"/></linearGradient>
-<linearGradient id="sun" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE08A"/><stop offset=".6" stop-color="{ORANGE}"/><stop offset="1" stop-color="{CORAL}"/></linearGradient>
-<clipPath id="sc"><circle cx="256" cy="250" r="129"/></clipPath></defs>
-<g clip-path="url(#c)"><rect width="{s}" height="{s}" fill="url(#sky)"/>
-<circle cx="256" cy="250" r="128" fill="url(#sun)"/><g clip-path="url(#sc)">{cuts}</g>
-<path d="M0,330 C80,300 150,350 256,322 C360,294 430,346 512,318 L512,512 L0,512 Z" fill="{OCEAN}"/>
-<path d="M0,380 C90,356 170,400 270,374 C370,348 440,396 512,372 L512,512 L0,512 Z" fill="{NAVY}"/>
-<path d="M0,330 C80,300 150,350 256,322 C360,294 430,346 512,318" fill="none" stroke="{CREAM}" stroke-width="10" stroke-linecap="round"/>
-<path d="M40,420 C120,404 190,432 280,414" fill="none" stroke="{SURF}" stroke-width="8" stroke-linecap="round"/></g>
-<circle cx="256" cy="256" r="232" fill="none" stroke="{NAVY}" stroke-width="22"/>
-<circle cx="256" cy="256" r="214" fill="none" stroke="{CREAM}" stroke-width="6"/></svg>'''
+    """Start button / distro logo: Chicken Joe's head from joe-frame.png as a rounded square."""
+    head = Image.open(os.path.join(HERE, "joe-frame.png")).convert("RGB").crop((540, 30, 960, 450)).resize((256, 256), Image.LANCZOS)
+    png = io.BytesIO()
+    head.save(png, "PNG")
+    uri = "data:image/png;base64," + base64.b64encode(png.getvalue()).decode()
+    return f'''<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="512" height="512" viewBox="0 0 512 512">
+<defs><clipPath id="c"><rect width="512" height="512" rx="112"/></clipPath></defs>
+<image width="512" height="512" clip-path="url(#c)" xlink:href="{uri}" href="{uri}"/></svg>'''
+
+
+
 
 
 def save(img, *p, **kw):
@@ -145,8 +141,9 @@ if __name__ == "__main__":
     # logo
     svg = logo_svg()
     for theme in ["EndlessSummer", "EndlessSummerNight"]:
-        for n in ["start-here-kde", "start-here", "distributor-logo"]:
-            open(out("usr/share/icons", theme, "scalable/places", n + ".svg"), "w").write(svg)
+        for n in ["start-here-kde", "start-here", "distributor-logo", "start-here-kde-plasma", "start-here-kde-symbolic",
+                  "start-here-symbolic", "start-here-kde-plasma-symbolic", "distributor-logo-symbolic"]:
+            open(out("usr/share/icons", theme, "places/scalable", n + ".svg"), "w").write(svg)
     logo256 = svg2img(svg, 256, 256)
     save(logo256, "usr/share/endless-summer/logo.png")
 

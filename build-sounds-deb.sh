@@ -4,7 +4,7 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-VERSION=${VERSION:-26.1.2}
+VERSION=${VERSION:-26.1.5}
 OUT=endless-summer-sounds_${VERSION}_all.deb
 PKG=$(mktemp -d)
 trap 'rm -rf "$PKG"' EXIT
@@ -42,12 +42,15 @@ set -e
 exit 0
 EOF2
 
-# Per-user links would dangle once the clips are gone.
+# Per-user links (and the patched Kickoff/volume copies) would dangle once the clips are gone.
 cat > "$PKG/DEBIAN/prerm" <<'EOF'
 #!/bin/sh
 set -e
 if [ "$1" = remove ]; then
     rm -rf /home/*/.local/share/sounds/endless-summer
+    for k in /home/*/.local/share/plasma/plasmoids/org.kde.plasma.kickoff /home/*/.local/share/plasma/plasmoids/org.kde.plasma.volume; do
+        [ -e "$k/.endless-summer" ] && rm -rf "$k"
+    done
 fi
 EOF
 chmod 755 "$PKG/DEBIAN/prerm" "$PKG/DEBIAN/postinst"
@@ -57,6 +60,8 @@ dpkg-deb --root-owner-group -Zxz --build "$PKG" "$OUT"
 LIST=$(dpkg-deb -c "$OUT")
 for f in usr/libexec/endless-summer-sounds \
          usr/share/endless-summer-sounds/index.theme \
+         usr/share/endless-summer-sounds/patches/kickoff.qml \
+         usr/share/endless-summer-sounds/patches/volume.qml \
          etc/xdg/plasma-workspace/env/endless-summer-sounds.sh; do
     grep -q " \./$f\$" <<<"$LIST" || { echo "missing $f in $OUT" >&2; exit 1; }
 done
