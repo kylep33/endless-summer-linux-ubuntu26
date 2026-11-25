@@ -136,6 +136,7 @@ for f in usr/share/plasma/look-and-feel/org.endlesssummer.desktop/metadata.json 
          usr/share/fonts/truetype/bebas-neue/BebasNeue-Regular.ttf \
          etc/skel/.config/kdeglobals \
          etc/xdg/autostart/endless-summer-first-login.desktop \
+         etc/xdg/plasma-workspace/env/endless-summer-layout.sh \
          usr/libexec/endless-summer-first-login; do
     grep -q " \./$f\$" <<<"$LIST" || { echo "missing $f in $OUT" >&2; exit 1; }
 done

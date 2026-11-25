@@ -1,5 +1,6 @@
 #!/bin/sh
-# Apply the theme (with its panel layout) once per user, on their first Plasma login.
+# Apply the theme once per user, on their first Plasma login. The panel layout was already set up before
+# plasmashell started, see /etc/xdg/plasma-workspace/env/endless-summer-layout.sh.
 # Delete the marker file to have it re-applied at next login.
 # Every login: give a Chicken Joe avatar to anyone without one. AccountsService copy is what SDDM
 # reads, since it can't see into 750 home dirs.
@@ -8,7 +9,7 @@
     "/org/freedesktop/Accounts/User$(id -u)" org.freedesktop.Accounts.User SetIconFile s "$HOME/.face.icon"
 
 marker="${XDG_CONFIG_HOME:-$HOME/.config}/endless-summer-applied"
-[ -e "$marker" ] || { plasma-apply-lookandfeel -a org.endlesssummer.desktop --resetLayout && touch "$marker"; }
+[ -e "$marker" ] || { plasma-apply-lookandfeel -a org.endlesssummer.desktop && touch "$marker"; }
 
 # Every login: a random surf photo on the desktop (after the theme, which sets its own wallpaper).
 pic=$(find /usr/share/endless-summer/wallpapers -name '*.jpg' | shuf -n1)
