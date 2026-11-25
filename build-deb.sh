@@ -1,11 +1,11 @@
 #!/bin/bash
 # Package root/ (laid out exactly as installed under /) into endless-summer-theme_<version>_all.deb
-# Usage: ./build-deb.sh            (VERSION=26.1.2 ./build-deb.sh to bump)
+# Usage: ./build-deb.sh            (VERSION=26.1.3 ./build-deb.sh to bump)
 # Personal use only: the photos and Chicken Joe avatar are not ours to redistribute.
 set -euo pipefail
 cd "$(dirname "$0")"
 
-VERSION=${VERSION:-26.1.0}
+VERSION=${VERSION:-26.1.1}
 OUT=endless-summer-theme_${VERSION}_all.deb
 PKG=$(mktemp -d)
 trap 'rm -rf "$PKG"' EXIT
@@ -103,8 +103,9 @@ for f in usr/share/plasma/look-and-feel/org.endlesssummer.desktop/metadata.json 
          usr/share/plasma/look-and-feel/org.endlesssummernight.desktop/metadata.json \
          usr/share/plasma/look-and-feel/org.endlesssummernight.desktop/contents/splash/Splash.qml \
          usr/share/wallpapers/EndlessSummer/metadata.json \
-         usr/share/wallpapers/EndlessSummer/contents/images/1920x1080.png \
-         usr/share/wallpapers/EndlessSummer/contents/images_dark/1920x1080.png \
+         usr/share/wallpapers/EndlessSummer/contents/images/1920x1080.jpg \
+         usr/share/wallpapers/EndlessSummer/contents/images_dark/1920x1080.jpg \
+         usr/share/endless-summer/wallpapers/01.jpg \
          usr/share/color-schemes/EndlessSummer.colors \
          usr/share/color-schemes/EndlessSummerNight.colors \
          usr/share/icons/EndlessSummer/index.theme \

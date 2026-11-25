@@ -1,4 +1,4 @@
-# Endless Summer boot splash: sunset art filling the screen, logo, progress bar,
+# Endless Summer boot splash: a surf photo filling the screen, logo, progress bar,
 # and a password prompt for encrypted disks.
 Window.SetBackgroundTopColor(0.04, 0.11, 0.18);
 Window.SetBackgroundBottomColor(0.04, 0.11, 0.18);

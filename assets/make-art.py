@@ -3,9 +3,9 @@
 
 Needs: cairosvg, pillow (pip, in a venv). Run: python make-art.py
 Inputs in this folder: photos/*.png (reference photos), joe-frame.png (avatar source),
-fonts/BebasNeue-Regular.ttf.
+fonts/BebasNeue-Regular.ttf, photos/surf/* (wallpaper pool).
 """
-import io, math, os, random
+import io, os
 import cairosvg
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
@@ -16,7 +16,14 @@ BEBAS = os.path.join(HERE, "fonts", "BebasNeue-Regular.ttf")
 # palette: Kodachrome sea and sky, sand, and the Travoltas-cover red
 NAVY, OCEAN, SURF, SKY = "#0E2F44", "#1B7FA6", "#2BB3C9", "#9FD8E8"
 SAND, CREAM, CORAL, ORANGE, SUN = "#EDD7A8", "#FBF4E4", "#E0472F", "#F28C28", "#F9C74F"
-DUSK_TOP, DUSK_MID = "#0B1D2E", "#3D2A5C"
+
+# Surf photos for the wallpaper pool, in photos/surf/: (file, crop ytop, pre-crop box or None)
+PHOTOS = [
+    ("surf.jpg", 0.5, None), ("surf2.jpg", 0.5, None), ("surf3.jpg", 0.5, None), ("surf4.jpg", 0.5, None),
+    ("surf5.jpg", 0.5, None),
+    ("surf6.jpg", 0.3, (0, 0, 982, 861)),  # dark line down the right edge
+    ("surf7.jpeg", 0.5, None), ("surf8.jpg", 0.5, None),
+]
 
 
 def out(*p):
@@ -27,70 +34,6 @@ def out(*p):
 
 def svg2img(svg, w, h):
     return Image.open(io.BytesIO(cairosvg.svg2png(bytestring=svg.encode(), output_width=w, output_height=h))).convert("RGBA")
-
-
-def wave_path(y, amp, length, phase, w, h, bottom=None):
-    pts = [f"M0,{bottom}"] if bottom is not None else []
-    for x in range(0, w + 41, 40):
-        yy = y + amp * math.sin(2 * math.pi * x / length + phase) + amp * 0.35 * math.sin(2 * math.pi * x / (length * 0.43) + phase * 2)
-        pts.append(f"L{x},{yy:.1f}")
-    if bottom is None:
-        return "M" + " ".join(pts)[1:]
-    pts.append(f"L{w},{bottom} Z")
-    return " ".join(pts)
-
-
-def board(cx, base, length, width, angle, rail, deck, stringer):
-    """A longboard standing nose-up in the sand, outline in local coords then rotated."""
-    l, w = length, width / 2
-    d = (f"M0,{-l} C{w*0.9},{-l*0.82} {w},{-l*0.45} {w},{-l*0.2} "
-         f"C{w},{-l*0.02} {w*0.7},0 0,0 C{-w*0.7},0 {-w},{-l*0.02} {-w},{-l*0.2} "
-         f"C{-w},{-l*0.45} {-w*0.9},{-l*0.82} 0,{-l} Z")
-    inner = w * 0.78
-    di = (f"M0,{-l*0.95} C{inner*0.9},{-l*0.8} {inner},{-l*0.45} {inner},{-l*0.2} "
-          f"C{inner},{-l*0.05} {inner*0.7},{-l*0.03} 0,{-l*0.03} C{-inner*0.7},{-l*0.03} {-inner},{-l*0.05} {-inner},{-l*0.2} "
-          f"C{-inner},{-l*0.45} {-inner*0.9},{-l*0.8} 0,{-l*0.95} Z")
-    return (f'<g transform="translate({cx},{base}) rotate({angle})">'
-            f'<path d="{d}" fill="{rail}"/><path d="{di}" fill="{deck}"/>'
-            f'<rect x="-6" y="{-l*0.95}" width="12" height="{l*0.92}" fill="{stringer}"/></g>')
-
-
-def scene(night, w=3840, h=2160):
-    hz = int(h * 0.60)  # horizon
-    sun_r, sun_cy = 560, (hz + 40 if night else hz - 260)
-    sky = [(0, DUSK_TOP), (0.55, DUSK_MID), (1, CORAL)] if night else [(0, "#7CC6DE"), (0.6, "#CFEAEF"), (1, "#FCE6B6")]
-    sun = [(0, SUN), (0.55, ORANGE), (1, CORAL)] if night else [(0, "#FFE08A"), (0.6, SUN), (1, ORANGE)]
-    stops = lambda s: "".join(f'<stop offset="{o}" stop-color="{c}"/>' for o, c in s)
-    # retro sun: horizontal cuts that thicken toward the horizon
-    cuts, y, gap = [], min(sun_cy + 40, hz - 260), 10
-    while y < sun_cy + sun_r:
-        cuts.append(f'<rect x="0" y="{y}" width="{w}" height="{gap}" fill="url(#sky)"/>')
-        y += 70
-        gap += 9
-    stars = ""
-    if night:
-        rnd = random.Random(7)
-        stars = "".join(f'<circle cx="{rnd.uniform(0, w):.0f}" cy="{rnd.uniform(0, hz*0.6):.0f}" r="{rnd.choice([2, 2, 3, 4])}" fill="{CREAM}" opacity="{rnd.uniform(.4, .9):.2f}"/>' for _ in range(160))
-    seas = ([("#152C45", 0), ("#11253B", 140), ("#0C1C2E", 330)] if night else [(OCEAN, 0), ("#166D93", 140), (NAVY, 330)])
-    sea = f'<rect x="0" y="{hz}" width="{w}" height="{h-hz}" fill="{seas[0][0]}"/>'
-    for i, (c, dy) in enumerate(seas[1:], 1):
-        sea += f'<path d="{wave_path(hz + dy, 14 + 8*i, 900 - 150*i, i, w, h, h)}" fill="{c}"/>'
-    foam = "".join(f'<path d="{wave_path(hz + dy, 10 + 6*i, 700 - 90*i, i*1.7, w, h)}" fill="none" stroke="{CREAM}" stroke-width="{5+3*i}" stroke-opacity="{.35 if night else .55}" stroke-linecap="round"/>'
-                   for i, dy in enumerate([60, 210, 400]))
-    # sun glitter on the water
-    glit = "".join(f'<rect x="{w/2 - (380 - 26*k)}" y="{hz + 30 + 34*k}" width="{2*(380 - 26*k)}" height="{8 + k}" rx="6" fill="{ORANGE if night else "#FFF3C4"}" opacity="{.75 - .05*k:.2f}"/>' for k in range(12))
-    sand_top = int(h * 0.80)
-    sand = (f'<path d="M0,{sand_top+60} C{w*0.25},{sand_top-30} {w*0.55},{sand_top+50} {w},{sand_top-40} L{w},{h} L0,{h} Z" fill="{"#7A5A44" if night else SAND}"/>'
-            f'<path d="M0,{sand_top+60} C{w*0.25},{sand_top-30} {w*0.55},{sand_top+50} {w},{sand_top-40}" fill="none" stroke="{CREAM}" stroke-width="22" stroke-opacity="{.25 if night else .9}"/>')
-    boards = (board(3020, sand_top + 170, 980, 230, 7, "#5E2A22" if night else CORAL, "#2E2230" if night else CREAM, "#5E2A22" if night else CORAL)
-              + board(3260, sand_top + 150, 900, 210, -5, "#1E2A3A" if night else NAVY, "#3A2F3F" if night else SAND, "#1E2A3A" if night else NAVY))
-    return f'''<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}">
-<defs><linearGradient id="sky" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="{hz}">{stops(sky)}</linearGradient>
-<linearGradient id="sun" x1="0" y1="0" x2="0" y2="1">{stops(sun)}</linearGradient>
-<clipPath id="sunclip"><circle cx="{w/2}" cy="{sun_cy}" r="{sun_r + 2}"/></clipPath></defs>
-<rect width="{w}" height="{hz}" fill="url(#sky)"/>{stars}
-<circle cx="{w/2}" cy="{sun_cy}" r="{sun_r}" fill="url(#sun)"/><g clip-path="url(#sunclip)">{"".join(cuts)}</g>
-{sea}{glit}{foam}{sand}{boards}</svg>'''
 
 
 def title(img, text, size, xy, fill, shadow, anchor="ls", spacing=0.08):
@@ -153,6 +96,13 @@ def fit(img, w, h, ytop=0.5):
     return img.resize((w, h), Image.LANCZOS)
 
 
+def fit16x9(img, ytop=0.5):
+    """Crop to 16:9 at the photo's own resolution, capped at 4K."""
+    sw, sh = img.size
+    w = min(3840, sw, int(sh * 16 / 9)) // 16 * 16
+    return fit(img, w, w * 9 // 16, ytop)
+
+
 def panel_mock(bg, dark):
     """Theme thumbnail: wallpaper plus a floating panel, since there's no Plasma here to screenshot."""
     img = bg.copy().convert("RGBA")
@@ -174,13 +124,18 @@ def panel_mock(bg, dark):
 
 
 if __name__ == "__main__":
-    # wallpapers: one package, day in images/, night in images_dark/ (Plasma picks by color scheme)
-    day, night = svg2img(scene(False), 3840, 2160), svg2img(scene(True), 3840, 2160)
+    # wallpaper pool: a random one is set at every login (see usr/libexec/endless-summer-first-login)
+    pool = {}
+    for i, (name, ytop, box) in enumerate(PHOTOS, 1):
+        img = Image.open(os.path.join(HERE, "photos", "surf", name))
+        pool[name] = grade(fit16x9(img.crop(box) if box else img, ytop))
+        save(pool[name], f"usr/share/endless-summer/wallpapers/{i:02}.jpg", quality=92)
+
+    # the default wallpaper package (before the first login picks one): day in images/, night in images_dark/
+    day, night = pool["surf2.jpg"], pool["surf5.jpg"]
     for img, sub in [(day, "images"), (night, "images_dark")]:
-        title(img, "ENDLESS SUMMER", 150, (180, 2000), NAVY if sub == "images" else CREAM, None)
-        for w, h in [(3840, 2160), (1920, 1080)]:
-            save(img.resize((w, h), Image.LANCZOS).convert("RGB"), "usr/share/wallpapers/EndlessSummer/contents", sub, f"{w}x{h}.png", optimize=True)
-    save(day.resize((400, 225), Image.LANCZOS).convert("RGB"), "usr/share/wallpapers/EndlessSummer/contents/screenshot.png")
+        save(fit(img, 1920, 1080), "usr/share/wallpapers/EndlessSummer/contents", sub, "1920x1080.jpg", quality=90)
+    save(fit(day, 400, 225), "usr/share/wallpapers/EndlessSummer/contents/screenshot.png")
 
     # the reference photos as extra wallpapers
     photos = {"SurfCheck": ("Pasted image.png", 0.12), "TheWave": ("Pasted image (3).png", 0.5)}
@@ -197,8 +152,9 @@ if __name__ == "__main__":
     logo256 = svg2img(svg, 256, 256)
     save(logo256, "usr/share/endless-summer/logo.png")
 
-    # plymouth: night art without text, plus logo+title on its own so the script can center it
-    save(night.resize((1920, 1080), Image.LANCZOS).convert("RGB"), "usr/share/plymouth/themes/endless-summer/background.png")
+    # plymouth: a dark photo, dimmed further under the logo, plus logo+title on its own so the script can center it
+    boot = fit(pool["surf5.jpg"], 1920, 1080)
+    save(Image.blend(boot, Image.new("RGB", boot.size, NAVY), 0.35), "usr/share/plymouth/themes/endless-summer/background.png")
     plogo = Image.new("RGBA", (720, 420))
     plogo.alpha_composite(svg2img(svg, 240, 240), (240, 0))
     title(plogo, "ENDLESS SUMMER", 110, (360, 380), CREAM, (11, 29, 46, 200), anchor="ms")
@@ -208,9 +164,10 @@ if __name__ == "__main__":
     # ksplash: same art per variant, the logo is drawn by QML
     for pkg, bg in [("org.endlesssummer.desktop", day), ("org.endlesssummernight.desktop", night)]:
         base = f"usr/share/plasma/look-and-feel/{pkg}/contents"
-        save(bg.resize((1920, 1080), Image.LANCZOS).convert("RGB"), base, "splash/images/background.jpg", quality=90)
+        bg = fit(bg, 1920, 1080)
+        save(bg, base, "splash/images/background.jpg", quality=90)
         save(svg2img(svg, 512, 512), base, "splash/images/logo.png")
-        mock = panel_mock(bg.resize((1920, 1080), Image.LANCZOS), "night" in pkg)
+        mock = panel_mock(bg, "night" in pkg)
         save(mock, base, "previews/fullscreenpreview.jpg", quality=88)
         save(mock.resize((960, 540), Image.LANCZOS), base, "previews/preview.png")
 

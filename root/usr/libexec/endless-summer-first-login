@@ -8,5 +8,8 @@
     "/org/freedesktop/Accounts/User$(id -u)" org.freedesktop.Accounts.User SetIconFile s "$HOME/.face.icon"
 
 marker="${XDG_CONFIG_HOME:-$HOME/.config}/endless-summer-applied"
-[ -e "$marker" ] && exit 0
-plasma-apply-lookandfeel -a org.endlesssummer.desktop --resetLayout && touch "$marker"
+[ -e "$marker" ] || { plasma-apply-lookandfeel -a org.endlesssummer.desktop --resetLayout && touch "$marker"; }
+
+# Every login: a random surf photo on the desktop (after the theme, which sets its own wallpaper).
+pic=$(find /usr/share/endless-summer/wallpapers -name '*.jpg' | shuf -n1)
+[ -z "$pic" ] || plasma-apply-wallpaperimage "$pic"
